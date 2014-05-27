@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>biz.neustar.esrl</groupId>
+		<artifactId>esrl</artifactId>
+		<version>1.9-SNAPSHOT</version>
+	</parent>
+	<artifactId>esrl-worklist</artifactId>
+	<packaging>jar</packaging>
+	<name>ESRL Worklist Service</name>
+	<url>http://maven.apache.org</url>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<c3p0.version>0.9.1</c3p0.version>
+		<oracle.client.version>11.2.0.3</oracle.client.version>
+		<activiti.version>5.13</activiti.version>
+		<esrl.version>1.9-SNAPSHOT</esrl.version>
+	</properties>
+	<dependencies>
+		<!-- other dependencies -->
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>biz.neustar.esrl</groupId>
+			<artifactId>activiti-api-tra</artifactId>
+			<version>${esrl.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.activiti</groupId>
+			<artifactId>activiti-engine</artifactId>
+			<version>${activiti.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.activiti</groupId>
+			<artifactId>activiti-spring</artifactId>
+			<version>${activiti.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>c3p0</groupId>
+			<artifactId>c3p0</artifactId>
+			<version>0.9.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>biz.neustar.esrl</groupId>
+			<artifactId>esrl-core</artifactId>
+			<version>${esrl.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>biz.neustar.esrl</groupId>
+			<artifactId>esrl-common</artifactId>
+			<version>${esrl.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>biz.neustar.esrl</groupId>
+			<artifactId>esrl-views</artifactId>
+			<version>${esrl.version}</version>
+		</dependency>
+	</dependencies>
+</project>
