@@ -1,4 +1,6 @@
 import boto3
+import json
+import uuid
 
 # Replace these with your actual AWS credentials
 aws_access_key = 'YOUR_ACCESS_KEY'
@@ -14,44 +16,45 @@ iam_client = boto3.client(
     region_name=region_name
 )
 
-# Open a file for writing
-output_file_path = 'iam_role_info.txt'
-with open(output_file_path, 'w') as output_file:
-    # Fetch information about the IAM role
-    try:
-        role_response = iam_client.get_role(RoleName=role_name)
-        role_info = role_response['Role']
+# Fetch information about the IAM role
+try:
+    role_response = iam_client.get_role(RoleName=role_name)
+    role_info = role_response['Role']
+    
+    # Generate a UUID
+    generated_uuid = str(uuid.uuid4())
 
-        output_file.write("IAM Role Information:\n")
-        output_file.write(f"Role Name: {role_info['RoleName']}\n")
-        output_file.write(f"Role ID: {role_info['RoleId']}\n")
-        output_file.write(f"ARN: {role_info['Arn']}\n")
-        output_file.write(f"Path: {role_info['Path']}\n")
-        output_file.write(f"Assume Role Policy Document: {role_info['AssumeRolePolicyDocument']}\n")
-        output_file.write(f"Create Date: {role_info['CreateDate']}\n")
+    # Fetch attached policies
+    attached_policies_response = iam_client.list_attached_role_policies(RoleName=role_name)
+    attached_policies = attached_policies_response['AttachedPolicies']
+    attached_policy_names = [policy['PolicyName'] for policy in attached_policies]
 
-        # Fetch attached policies
-        attached_policies_response = iam_client.list_attached_role_policies(RoleName=role_name)
-        attached_policies = attached_policies_response['AttachedPolicies']
+    # Fetch trust relationship data (assume role policy)
+    assume_role_policy = json.loads(role_info['AssumeRolePolicyDocument'])
 
-        output_file.write("\nAttached Policies:\n")
-        for policy in attached_policies:
-            output_file.write(f"Policy Name: {policy['PolicyName']}\n")
-            output_file.write(f"Policy ARN: {policy['PolicyArn']}\n")
-            output_file.write(f"Policy ID: {policy['PolicyId']}\n")
+    # Fetch inline policies
+    inline_policies_response = iam_client.list_role_policies(RoleName=role_name)
+    inline_policy_names = inline_policies_response['PolicyNames']
+    inline_policy_data = {}
+    for policy_name in inline_policy_names:
+        inline_policy_response = iam_client.get_role_policy(RoleName=role_name, PolicyName=policy_name)
+        inline_policy_document = inline_policy_response['PolicyDocument']
+        inline_policy_data[policy_name] = inline_policy_document
 
-        # Fetch inline policies
-        inline_policies_response = iam_client.list_role_policies(RoleName=role_name)
-        inline_policy_names = inline_policies_response['PolicyNames']
+    # Create the final JSON structure
+    result = {
+        "uuid": generated_uuid,
+        "managed_policy_names": attached_policy_names,
+        "assume_role_policy_data": assume_role_policy,
+        "inline_policy_data": inline_policy_data
+    }
 
-        output_file.write("\nInline Policies:\n")
-        for policy_name in inline_policy_names:
-            inline_policy_response = iam_client.get_role_policy(RoleName=role_name, PolicyName=policy_name)
-            inline_policy_document = inline_policy_response['PolicyDocument']
-            output_file.write(f"Policy Name: {policy_name}\n")
-            output_file.write(f"Policy Document: {inline_policy_document}\n")
+    # Write the JSON to a file
+    output_file_path = 'iam_role_info.json'
+    with open(output_file_path, 'w') as output_file:
+        json.dump(result, output_file, indent=2)
 
-    except Exception as e:
-        output_file.write(f"An error occurred: {e}\n")
+    print(f"Role information saved to {output_file_path}")
 
-print(f"Role information saved to {output_file_path}")
+except Exception as e:
+    print("An error occurred:", e)
