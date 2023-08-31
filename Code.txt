@@ -14,39 +14,44 @@ iam_client = boto3.client(
     region_name=region_name
 )
 
-# Fetch information about the IAM role
-try:
-    role_response = iam_client.get_role(RoleName=role_name)
-    role_info = role_response['Role']
+# Open a file for writing
+output_file_path = 'iam_role_info.txt'
+with open(output_file_path, 'w') as output_file:
+    # Fetch information about the IAM role
+    try:
+        role_response = iam_client.get_role(RoleName=role_name)
+        role_info = role_response['Role']
 
-    print("IAM Role Information:")
-    print("Role Name:", role_info['RoleName'])
-    print("Role ID:", role_info['RoleId'])
-    print("ARN:", role_info['Arn'])
-    print("Path:", role_info['Path'])
-    print("Assume Role Policy Document:", role_info['AssumeRolePolicyDocument'])
-    print("Create Date:", role_info['CreateDate'])
+        output_file.write("IAM Role Information:\n")
+        output_file.write(f"Role Name: {role_info['RoleName']}\n")
+        output_file.write(f"Role ID: {role_info['RoleId']}\n")
+        output_file.write(f"ARN: {role_info['Arn']}\n")
+        output_file.write(f"Path: {role_info['Path']}\n")
+        output_file.write(f"Assume Role Policy Document: {role_info['AssumeRolePolicyDocument']}\n")
+        output_file.write(f"Create Date: {role_info['CreateDate']}\n")
 
-    # Fetch attached policies
-    attached_policies_response = iam_client.list_attached_role_policies(RoleName=role_name)
-    attached_policies = attached_policies_response['AttachedPolicies']
+        # Fetch attached policies
+        attached_policies_response = iam_client.list_attached_role_policies(RoleName=role_name)
+        attached_policies = attached_policies_response['AttachedPolicies']
 
-    print("\nAttached Policies:")
-    for policy in attached_policies:
-        print("Policy Name:", policy['PolicyName'])
-        print("Policy ARN:", policy['PolicyArn'])
-        print("Policy ID:", policy['PolicyId'])
+        output_file.write("\nAttached Policies:\n")
+        for policy in attached_policies:
+            output_file.write(f"Policy Name: {policy['PolicyName']}\n")
+            output_file.write(f"Policy ARN: {policy['PolicyArn']}\n")
+            output_file.write(f"Policy ID: {policy['PolicyId']}\n")
 
-    # Fetch inline policies
-    inline_policies_response = iam_client.list_role_policies(RoleName=role_name)
-    inline_policy_names = inline_policies_response['PolicyNames']
+        # Fetch inline policies
+        inline_policies_response = iam_client.list_role_policies(RoleName=role_name)
+        inline_policy_names = inline_policies_response['PolicyNames']
 
-    print("\nInline Policies:")
-    for policy_name in inline_policy_names:
-        inline_policy_response = iam_client.get_role_policy(RoleName=role_name, PolicyName=policy_name)
-        inline_policy_document = inline_policy_response['PolicyDocument']
-        print("Policy Name:", policy_name)
-        print("Policy Document:", inline_policy_document)
+        output_file.write("\nInline Policies:\n")
+        for policy_name in inline_policy_names:
+            inline_policy_response = iam_client.get_role_policy(RoleName=role_name, PolicyName=policy_name)
+            inline_policy_document = inline_policy_response['PolicyDocument']
+            output_file.write(f"Policy Name: {policy_name}\n")
+            output_file.write(f"Policy Document: {inline_policy_document}\n")
 
-except Exception as e:
-    print("An error occurred:", e)
+    except Exception as e:
+        output_file.write(f"An error occurred: {e}\n")
+
+print(f"Role information saved to {output_file_path}")
