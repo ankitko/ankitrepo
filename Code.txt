@@ -1,60 +1,30 @@
-import boto3
 import json
-import uuid
+import os
 
-# Replace these with your actual AWS credentials
-aws_access_key = 'YOUR_ACCESS_KEY'
-aws_secret_key = 'YOUR_SECRET_KEY'
-region_name = 'us-east-1'  # Replace with your desired region
-role_name = 'your-role-name'  # Replace with the IAM role name you want to fetch information for
+# Specify the path to your JSON file
+json_file_path = "path/to/your/json_file.json"
 
-# Initialize the Boto3 IAM client
-iam_client = boto3.client(
-    'iam',
-    aws_access_key_id=aws_access_key,
-    aws_secret_access_key=aws_secret_key,
-    region_name=region_name
-)
+def create_json_files(data):
+    for item in data:
+        name = item.get('name', 'Unknown')
+        file_name = f'{name}.json'
 
-# Fetch information about the IAM role
-try:
-    role_response = iam_client.get_role(RoleName=role_name)
-    role_info = role_response['Role']
-    
-    # Generate a UUID
-    generated_uuid = str(uuid.uuid4())
+        with open(file_name, 'w') as file:
+            json.dump(item, file, indent=4)
 
-    # Fetch attached policies
-    attached_policies_response = iam_client.list_attached_role_policies(RoleName=role_name)
-    attached_policies = attached_policies_response['AttachedPolicies']
-    attached_policy_names = [policy['PolicyName'] for policy in attached_policies]
+        print(f'Created file: {file_name}')
 
-    # Fetch trust relationship data (assume role policy)
-    assume_role_policy = json.loads(role_info['AssumeRolePolicyDocument'])
+def main():
+    try:
+        with open(json_file_path, 'r') as json_file:
+            json_data = json.load(json_file)
 
-    # Fetch inline policies
-    inline_policies_response = iam_client.list_role_policies(RoleName=role_name)
-    inline_policy_names = inline_policies_response['PolicyNames']
-    inline_policy_data = {}
-    for policy_name in inline_policy_names:
-        inline_policy_response = iam_client.get_role_policy(RoleName=role_name, PolicyName=policy_name)
-        inline_policy_document = inline_policy_response['PolicyDocument']
-        inline_policy_data[policy_name] = inline_policy_document
+        create_json_files(json_data)
+    except FileNotFoundError:
+        print(f"File not found: {json_file_path}")
+    except json.JSONDecodeError:
+        print("Error decoding JSON data.")
 
-    # Create the final JSON structure
-    result = {
-        "uuid": generated_uuid,
-        "managed_policy_names": attached_policy_names,
-        "assume_role_policy_data": assume_role_policy,
-        "inline_policy_data": inline_policy_data
-    }
+if __name__ == "__main__":
+    main()
 
-    # Write the JSON to a file
-    output_file_path = 'iam_role_info.json'
-    with open(output_file_path, 'w') as output_file:
-        json.dump(result, output_file, indent=2)
-
-    print(f"Role information saved to {output_file_path}")
-
-except Exception as e:
-    print("An error occurred:", e)
