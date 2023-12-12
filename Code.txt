@@ -1,25 +1,17 @@
-import os
-import re
+# Dictionary to store grouped data
+grouped_data = {}
 
-def extract_repo_info(file_path):
-    with open(file_path, 'r') as file:
-        contents = file.read()
-        # Regular expression to match the pattern containing remote URL
-        pattern = r"remote\(https:\/\/bitbucket\.es\.ad\.adp\.com\/scm\/(?P<repo>[\w-]+)\/(?P<repo_name>[\w-]+)\.git\)"
-        matches = re.finditer(pattern, contents)
-        for match in matches:
-            repo = match.group('repo')
-            repo_name = match.group('repo_name')
-            print(f"File: {file_path} - Repo: {repo}, Repo Name: {repo_name}")
+# Iterate through the list of dictionaries
+for item in data:
+    repo = item['repo']
+    repo_name = item['repo_name']
+    
+    # Grouping by 'repo' key
+    if repo not in grouped_data:
+        grouped_data[repo] = []
+    grouped_data[repo].append(repo_name)
 
-def search_groovy_files(directory):
-    for root, _, files in os.walk(directory):
-        for file in files:
-            if file.endswith(".groovy"):
-                file_path = os.path.join(root, file)
-                extract_repo_info(file_path)
+# Create a list of dictionaries with grouped repo_name values
+output = [{'repo': key, 'repo_name': ' | '.join(values)} for key, values in grouped_data.items()]
 
-# Replace 'your_directory_path' with the directory path containing .groovy files
-directory_path = 'your_directory_path'
-
-search_groovy_files(directory_path)
+print(output)
